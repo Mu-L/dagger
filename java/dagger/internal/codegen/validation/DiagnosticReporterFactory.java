@@ -23,13 +23,12 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.FormatMethod;
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ChildFactoryMethodEdge;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.MaybeBinding;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.DiagnosticReporter;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -53,8 +52,8 @@ final class DiagnosticReporterFactory {
 
   /** Creates a reporter for a binding graph and a plugin. */
   DiagnosticReporterImpl reporter(
-      BindingGraph graph, BindingGraphPlugin plugin, boolean reportErrorsAsWarnings) {
-    return new DiagnosticReporterImpl(graph, plugin.pluginName(), reportErrorsAsWarnings);
+      BindingGraph graph, String pluginName, boolean reportErrorsAsWarnings) {
+    return new DiagnosticReporterImpl(graph, pluginName, reportErrorsAsWarnings);
   }
 
   /**
@@ -72,7 +71,7 @@ final class DiagnosticReporterFactory {
     DiagnosticReporterImpl(BindingGraph graph, String plugin, boolean reportErrorsAsWarnings) {
       this.plugin = plugin;
       this.reportErrorsAsWarnings = reportErrorsAsWarnings;
-      this.rootComponent = graph.rootComponentNode().componentPath().currentComponent();
+      this.rootComponent = graph.rootComponentNode().componentPath().currentComponent().java();
       this.diagnosticMessageGenerator = diagnosticMessageGeneratorFactory.create(graph);
     }
 
@@ -145,7 +144,7 @@ final class DiagnosticReporterFactory {
         Diagnostic.Kind diagnosticKind,
         ChildFactoryMethodEdge childFactoryMethodEdge,
         String message) {
-      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod());
+      printMessage(diagnosticKind, message, childFactoryMethodEdge.factoryMethod().java());
     }
 
     @Override

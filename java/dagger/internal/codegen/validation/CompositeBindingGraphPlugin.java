@@ -26,13 +26,13 @@ import static dagger.internal.codegen.langmodel.DaggerElements.elementEncloses;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.FormatMethod;
-import dagger.model.BindingGraph;
-import dagger.model.BindingGraph.ChildFactoryMethodEdge;
-import dagger.model.BindingGraph.ComponentNode;
-import dagger.model.BindingGraph.DependencyEdge;
-import dagger.model.BindingGraph.MaybeBinding;
-import dagger.spi.BindingGraphPlugin;
-import dagger.spi.DiagnosticReporter;
+import dagger.spi.model.BindingGraph;
+import dagger.spi.model.BindingGraph.ChildFactoryMethodEdge;
+import dagger.spi.model.BindingGraph.ComponentNode;
+import dagger.spi.model.BindingGraph.DependencyEdge;
+import dagger.spi.model.BindingGraph.MaybeBinding;
+import dagger.spi.model.BindingGraphPlugin;
+import dagger.spi.model.DiagnosticReporter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -217,15 +217,17 @@ public final class CompositeBindingGraphPlugin implements BindingGraphPlugin {
       // TODO(erichang): This repeats some of the logic in DiagnosticReporterImpl. Remove when
       // merged.
       if (elementEncloses(
-          graph.rootComponentNode().componentPath().currentComponent(),
-          childFactoryMethodEdge.factoryMethod())) {
+          graph.rootComponentNode().componentPath().currentComponent().java(),
+          childFactoryMethodEdge.factoryMethod().java())) {
         // Let this pass through since it is not an error reported on the root component
         delegate.reportSubcomponentFactoryMethod(diagnosticKind, childFactoryMethodEdge, message);
       } else {
         addMessage(
             diagnosticKind,
             String.format(
-                "[%s] %s", elementToString(childFactoryMethodEdge.factoryMethod()), message));
+                "[%s] %s",
+                elementToString(childFactoryMethodEdge.factoryMethod().java()),
+                message));
       }
     }
 
